@@ -1,51 +1,55 @@
 """
 Solutions for AoC 2025 Day 1.
 """
-from operator import sub, add
+from collections.abc import Iterator
+from io import TextIOWrapper
 
 
-def get_pwd_01(filename: str) -> int:
+def _turns(file: TextIOWrapper) -> Iterator[tuple[int, int]]:
     """
-    Calculate the password from the turns in data_file.
-    """
-
-    password, current = 0, 50
-
-    with open(filename, encoding="utf-8") as data_file:
-        while turn := data_file.readline():
-            if turn[0] == "R":
-                current = (current + int(turn[1:])) % 100
-            else:
-                assert turn[0] == "L"
-                current = (current - int(turn[1:])) % 100
-            password += int(current == 0)
-
-    return password
-
-
-def get_pwd_02(filename: str) -> int:
-    """
-    Calculate the password from the turns in data_file.
+    Yield tuple[direction, clicks] with direction == 1 if clockwise, else -1.
     """
 
-    password, current = 0, 50
+    file.seek(0)
+    while turn := file.readline():
+        direction = 1 if turn[0] == "R" else -1
+        clicks = int(turn[1:])
+        yield direction, clicks
 
-    with open(filename, encoding="utf-8") as data_file:
-        while turn := data_file.readline():
-            passes, remaining = divmod(int(turn[1:]), 100)
-            operator = add if turn[0] == "R" else sub
-            new_current = operator(current, remaining) % 100
-            if current != 0:
-                passes += int((operator is add and current > new_current) or
-                              (operator is sub and current < new_current) or
-                              new_current == 0)
-            password, current = password + passes, new_current
 
-    return password
+def get_pwd_01(turns: Iterator[tuple[int, int]]) -> int:
+    """
+    Calculate the password from the turns (part 1 solution).
+    """
+
+    pwd, pos = 0, 50
+
+    for (direction, clicks) in turns:
+        pwd += int((pos := (pos + direction * clicks) % 100) == 0)
+
+    return pwd
+
+
+def get_pwd_02(turns: Iterator[tuple[int, int]]) -> int:
+    """
+    Calculate the password from the turns (part 2 solution).
+    """
+
+    pwd, pos = 0, 50
+
+    for (direction, clicks) in turns:
+        passes = clicks // 100
+        new_position = (pos + direction * clicks % 100) % 100
+        if pos != 0:
+            passes += int((direction * pos > direction * new_position) or
+                          new_position == 0)
+        pwd, pos = pwd + passes, new_position
+
+    return pwd
 
 
 def _main() -> None:
-    for test in (True, False):
+    for test in (False, True):
 
         if test:
             filename = "secret_entrance_test_input_01.txt"
@@ -54,8 +58,9 @@ def _main() -> None:
             filename = "secret_entrance_input_01.txt"
             expected = 964, 5872
 
-        solutions = get_pwd_01(filename), get_pwd_02(filename)
-        assert solutions == expected
+        with open(filename, encoding="utf-8") as file:
+            solutions = get_pwd_01(_turns(file)), get_pwd_02(_turns(file))
+            assert solutions == expected
 
     print("OK!")
 
