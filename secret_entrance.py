@@ -38,18 +38,18 @@ def get_pwd_02(turns: Iterator[tuple[int, int]]) -> int:
     pwd, pos = 0, 50
 
     for (direction, clicks) in turns:
-        passes = clicks // 100
+        pwd += clicks // 100
         new_position = (pos + direction * clicks % 100) % 100
         if pos != 0:
-            passes += int((direction * pos > direction * new_position) or
-                          new_position == 0)
-        pwd, pos = pwd + passes, new_position
+            pwd += int((direction * pos > direction * new_position) or
+                       new_position == 0)
+        pos = new_position
 
     return pwd
 
 
 def _main() -> None:
-    for test in (False, True):
+    for test in (True, False):
 
         if test:
             filename = "secret_entrance_test_input_01.txt"
@@ -60,6 +60,7 @@ def _main() -> None:
 
         with open(filename, encoding="utf-8") as file:
             solutions = get_pwd_01(_turns(file)), get_pwd_02(_turns(file))
+            print(solutions)
             assert solutions == expected
 
     print("OK!")
