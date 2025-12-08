@@ -30,7 +30,7 @@ def sum_invalid_ids_01(intervals: Iterator[tuple[int, int]]) -> int:
 
 def sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
     """
-    Return solution for part 2
+    Return solution for part 2.
     """
 
     total = 0
