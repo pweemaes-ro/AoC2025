@@ -50,10 +50,10 @@ def _main() -> None:
     for test in (True, False):
 
         if test:
-            filename = "gift_shop_test_input_01.txt"
+            filename = "02_gift_shop_test_input.txt"
             expected = 1227775554, 4174379265
         else:
-            filename = "gift_shop_input_01.txt"
+            filename = "02_gift_shop_input.txt"
             expected = 12850231731, 24774350322
 
         with open(filename, encoding="utf-8") as file:
