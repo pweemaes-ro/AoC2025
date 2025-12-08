@@ -34,13 +34,15 @@ def sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
     """
 
     total = 0
+
     for first, last in intervals:
         for x in range(first, last + 1):
             for d in range(1, (n := len(s := str(x))) // 2 + 1):
                 if (n % d == 0 and
-                        len(set(s[i: i + d] for i in range(0, n, d))) == 1):
+                        all((s[0: d] == s[i: i + d]) for i in range(d, n, d))):
                     total += x
                     break
+
     return total
 
 
