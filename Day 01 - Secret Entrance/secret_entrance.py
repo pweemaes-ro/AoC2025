@@ -52,10 +52,10 @@ def _main() -> None:
     for test in (True, False):
 
         if test:
-            filename = "01_secret_entrance_test_input.txt"
+            filename = "secret_entrance_test_input.txt"
             expected = 3, 6
         else:
-            filename = "01_secret_entrance_input.txt"
+            filename = "secret_entrance_input.txt"
             expected = 964, 5872
 
         with open(filename, encoding="utf-8") as file:

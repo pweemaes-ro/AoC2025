@@ -46,10 +46,10 @@ def _main() -> None:
     for test in (True, False):
 
         if test:
-            filename = "03_lobby_test_input.txt"
+            filename = "lobby_test_input.txt"
             expected = 357, 3121910778619
         else:
-            filename = "03_lobby_input.txt"
+            filename = "lobby_input.txt"
             expected = 17427, 173161749617495
 
         with open(filename, encoding="utf-8") as file:
