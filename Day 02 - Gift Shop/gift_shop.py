@@ -5,7 +5,6 @@ import re
 from collections.abc import Iterator
 from functools import lru_cache
 from io import TextIOWrapper
-from time import process_time_ns
 
 
 def get_split_intervals(first: int, last: int) -> list[tuple[int, int]]:
@@ -74,8 +73,6 @@ def sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
     Return solution for part 2.
     """
 
-    # start = process_time_ns()
-
     total = 0
 
     for first, last in intervals:
@@ -91,9 +88,6 @@ def sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
                         total += int(s)
                         break
 
-    # stop = process_time_ns()
-    # print(f"sum_invalid_ids_02   : {stop - start} ns")
-
     return total
 
 
@@ -102,17 +96,10 @@ def re_sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
     Return solution for part 2.
     """
 
-    # start = process_time_ns()
-
     pattern = re.compile(r'^(.+?)\1+$')
-    result = sum(x if pattern.match(str(x)) else 0
-                 for first, last in intervals
-                 for x in range(first, last + 1))
-
-    # stop = process_time_ns()
-    # print(f"re_sum_invalid_ids_02: {stop - start} ns")
-
-    return result
+    return sum(x if pattern.match(str(x)) else 0
+               for first, last in intervals
+               for x in range(first, last + 1))
 
 
 def _main() -> None:
