@@ -3,58 +3,47 @@ Solutions for AoC 2025 Day 2.
 """
 import re
 from collections.abc import Iterator
+from functools import lru_cache
 from io import TextIOWrapper
+from time import process_time_ns
 
 
-# I considered sorting and merging the intervals, to avoid checking numbers
-# more than once, but it turned out there is no overlap in the intervals...
-# def merge_intervals(intervals: Sequence[tuple[int, int]]) -> \
-#         Sequence[tuple[int, int]]:
-#     """
-#     Reduce a list of integer intervals, by merging overlapping and connected
-#     intervals. Return the (sorted) result.
-#     """
-#
-#     if len(intervals) == 0:
-#         return []
-#
-#     (sorted_intervals := list(intervals)).sort()
-#     merged = [sorted_intervals[0]]
-#
-#     for current in sorted_intervals[1:]:
-#         last = merged[-1]
-#         # If current overlaps or is connected to last: merge them!
-#         if current[0] <= last[1] + 1:
-#             merged[-1] = (last[0], max(last[1], current[1]))
-#         else:
-#             merged.append(current)
-#
-#     return merged
-#
-#
-# def _merged_intervals(intervals: Sequence[tuple[int, int]]) \
-#         -> Iterator[tuple[int, int]]:
-#     """
-#     Same as merge_intervals, but now as a generator. Yield integer intervals,
-#     by merging overlapping and connected intervals.
-#     """
-#
-#     if len(intervals) == 0:
-#         return
-#
-#     (sorted_intervals := list(intervals)).sort()
-#     last = sorted_intervals[0]
-#
-#     for current in sorted_intervals[1:]:
-#         # If current overlaps or is connected to last: merge them, but don't
-#         # yield yet, since it may merge with next!
-#         if current[0] <= last[1] + 1:
-#             last = (last[0], max(last[1], current[1]))
-#         else:
-#             yield last
-#             last = current
-#
-#     yield last
+def get_split_intervals(first: int, last: int) -> list[tuple[int, int]]:
+    """
+    Split the interval into ordered list of intervals, with first and last of
+    equal nr of digits. If first and last are already of equal nr of digits,
+    the orignal interval is returned, else a list of two or more new intervals
+    is returned.
+    Example: with first = 950 and last = 1100, [(950, 999), (1000, 1100)] is
+    returned.
+    """
+
+    if (dif := len(str(last)) - (len_first := len(str(first)))) == 0:
+        return [(first, last)]
+
+    result = []
+    new_first = first
+
+    for _ in range(dif + 1):
+        new_last = min(10 ** len_first - 1, last)
+        result.append((new_first, new_last))
+        new_first = new_last + 1
+        len_first += 1
+    return result
+
+
+@lru_cache
+def get_repeat_infos(n: int) -> list[tuple[int, int]]:
+    """
+    Return tuples of all divisors d of n, except n itself, and n // d.
+    Example: for n = 8, return [(1, 8), (2, 4), (4, 2)], do not include (8, 1).
+    """
+
+    divisors = []
+    for i in range(1, n // 2 + 1):
+        if n % i == 0:
+            divisors.append((i, n // i))
+    return divisors
 
 
 def _intervals(file: TextIOWrapper) -> Iterator[tuple[int, int]]:
@@ -85,15 +74,49 @@ def sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
     Return solution for part 2.
     """
 
-    pattern = re.compile(r'^(.+?)\1+$')
+    # start = process_time_ns()
 
-    return sum(x if pattern.match(str(x)) else 0
-               for first, last in intervals
-               for x in range(first, last + 1))
+    total = 0
+
+    for first, last in intervals:
+        split_intervals = get_split_intervals(first, last)
+
+        for split_first, split_last in split_intervals:
+            length = len(str(split_first))
+            repeat_infos = get_repeat_infos(length)
+
+            for s in map(str, range(split_first, split_last + 1)):
+                for repeat_length, repeats in repeat_infos:
+                    if s == s[:repeat_length] * repeats:
+                        total += int(s)
+                        break
+
+    # stop = process_time_ns()
+    # print(f"sum_invalid_ids_02   : {stop - start} ns")
+
+    return total
+
+
+def re_sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
+    """
+    Return solution for part 2.
+    """
+
+    # start = process_time_ns()
+
+    pattern = re.compile(r'^(.+?)\1+$')
+    result = sum(x if pattern.match(str(x)) else 0
+                 for first, last in intervals
+                 for x in range(first, last + 1))
+
+    # stop = process_time_ns()
+    # print(f"re_sum_invalid_ids_02: {stop - start} ns")
+
+    return result
 
 
 def _main() -> None:
-    for test in (True, False):
+    for test in (True, False,):
 
         if test:
             filename = "gift_shop_test_input.txt"
