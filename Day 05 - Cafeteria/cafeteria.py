@@ -8,8 +8,8 @@ type Interval = tuple[int, int]
 type Id = int
 
 
-def _sorted_merged_intervals(intervals: Sequence[tuple[int, int]]) \
-        -> Iterator[tuple[int, int]]:
+def _sorted_merged_intervals(intervals: Sequence[Interval]) \
+        -> Iterator[Interval]:
     """
     Same as merge_intervals, but now as a generator. Yield integer intervals,
     by merging overlapping and connected intervals.
