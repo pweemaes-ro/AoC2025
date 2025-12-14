@@ -4,7 +4,6 @@ Solutions for AoC 2025 Day 6.
 import re
 from io import TextIOWrapper
 from math import prod
-from operator import add, mul
 
 nrs_pattern = re.compile(r'\d+')
 ops_pattern = re.compile(r'([*+])')
