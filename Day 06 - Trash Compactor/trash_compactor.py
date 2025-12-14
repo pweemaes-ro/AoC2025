@@ -1,12 +1,12 @@
 """
 Solutions for AoC 2025 Day 6.
 """
-import re
+from re import compile as regexp_compile
 from io import TextIOWrapper
 from math import prod
 
-nrs_pattern = re.compile(r'\d+')
-ops_pattern = re.compile(r'([*+])')
+nrs_pattern = regexp_compile(r'\d+')
+ops_pattern = regexp_compile(r'([*+])')
 
 
 def _transpose_to_ints(strings: list[str]) -> list[int]:
