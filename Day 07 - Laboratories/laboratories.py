@@ -22,10 +22,10 @@ def get_solutions(file: TextIOWrapper) -> tuple[int, int]:
         for position in positions:
             paths_count = positions.get(position, 0)
             if line[position] == "^":
-                if position >= min_position + 1:
-                    new_positions[position - 1] += paths_count
-                if position <= max_position - 1:
-                    new_positions[position + 1] += paths_count
+                if (p := position - 1) >= min_position:
+                    new_positions[p] += paths_count
+                if (p := position + 1) <= max_position:
+                    new_positions[p] += paths_count
                 split_count += 1
             else:
                 new_positions[position] += paths_count
