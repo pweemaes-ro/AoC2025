@@ -18,7 +18,7 @@ def _sorted_merged_intervals(intervals: Sequence[Interval]) \
     if len(intervals) == 0:
         return
 
-    (sorted_intervals := list(intervals)).sort()
+    sorted_intervals = sorted(intervals)
     last = sorted_intervals[0]
 
     for current in sorted_intervals[1:]:
@@ -77,7 +77,7 @@ def _main() -> None:
             filename = "cafeteria_test_input.txt"
             expected = 3, 14
         else:
-            filename = "cafetera_input.txt"
+            filename = "cafeteria_input.txt"
             expected = 726, 354226555270043
 
         with open(filename, encoding="utf-8") as file:

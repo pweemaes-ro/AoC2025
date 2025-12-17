@@ -38,11 +38,7 @@ def get_repeat_infos(n: int) -> list[tuple[int, int]]:
     Example: for n = 8, return [(1, 8), (2, 4), (4, 2)], do not include (8, 1).
     """
 
-    divisors = []
-    for i in range(1, n // 2 + 1):
-        if n % i == 0:
-            divisors.append((i, n // i))
-    return divisors
+    return [(i, n // i) for i in range(1, n // 2 + 1) if n % i == 0]
 
 
 def _intervals(file: TextIOWrapper) -> Iterator[tuple[int, int]]:
