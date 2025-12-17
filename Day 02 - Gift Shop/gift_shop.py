@@ -1,105 +1,76 @@
 """
 Solutions for AoC 2025 Day 2.
 """
-import re
-from collections.abc import Iterator
 from functools import lru_cache
-from io import TextIOWrapper
-
-
-def get_split_intervals(first: int, last: int) -> list[tuple[int, int]]:
-    """
-    Split the interval into ordered list of intervals, with first and last of
-    equal nr of digits. If first and last are already of equal nr of digits,
-    the orignal interval is returned, else a list of two or more new intervals
-    is returned.
-    Example: with first = 950 and last = 1100, [(950, 999), (1000, 1100)] is
-    returned.
-    """
-
-    if (dif := len(str(last)) - (len_first := len(str(first)))) == 0:
-        return [(first, last)]
-
-    result = []
-    new_first = first
-
-    for _ in range(dif + 1):
-        new_last = min(10 ** len_first - 1, last)
-        result.append((new_first, new_last))
-        new_first = new_last + 1
-        len_first += 1
-    return result
 
 
 @lru_cache
 def get_repeat_infos(n: int) -> list[tuple[int, int]]:
     """
-    Return tuples of all divisors d of n, except n itself, and n // d.
-    Example: for n = 8, return [(1, 8), (2, 4), (4, 2)], do not include (8, 1).
+    Return tuples (d, n // d) of all divisors d of n, except n itself. Example:
+    for n = 8, return [(1, 8), (2, 4), (4, 2)], but do not include (8, 1).
     """
 
     return [(i, n // i) for i in range(1, n // 2 + 1) if n % i == 0]
 
 
-def _intervals(file: TextIOWrapper) -> Iterator[tuple[int, int]]:
+def get_first_last(length: int, first: int, last: int) -> tuple[int, int]:
     """
-    Yield tuple[first, last] from file, where file contains a single line
-    consisting of comma-separated first-last.
-    """
+    Return tuple (s_first, s_last) where s_first is the smallest repeat string
+    of length digits and s_last is the largest repeat string of length digits
+    that might result in an invalid id. Example:
 
-    file.seek(0)
-    for interval in file.readline().split(','):
-        first, last = map(int, interval.split('-'))
-        yield first, last
+        get_first_last(length=3, first=123456789, last=234000000) => (123, 234)
 
-
-def sum_invalid_ids_01(intervals: Iterator[tuple[int, int]]) -> int:
-    """
-    Return solution for part 1.
+    since for each nr in [123, 234], repeating nr may be in the interval
+    [123456, 234000] (in fact: 123123123, 124124124, ..., 199199199, 200200200,
+    ..., 233233233) are all invalid ids in [123456789, 234000000], but
+    234234234 is not, since it is not in the interval),
     """
 
-    return sum(sum(x for x in range(first, last + 1)
-                   if not (n := len(s := str(x))) % 2
-                   and s[:n // 2] == s[n // 2:])
-               for first, last in intervals)
+    s_first, s_last = first, last
+    upper_limit = 10 ** length
+    while s_first >= upper_limit:
+        s_first //= 10
+    while s_last >= upper_limit:
+        s_last //= 10
+    return s_first, s_last
 
 
-def sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
+def process_r_info(r_info: tuple[int, int], interval_first: int,
+                   interval_last: int, part_1: set[int],
+                   part_2: set[int]) -> None:
     """
-    Return solution for part 2.
-    """
-
-    total = 0
-
-    for first, last in intervals:
-        split_intervals = get_split_intervals(first, last)
-
-        for split_first, split_last in split_intervals:
-            length = len(str(split_first))
-            repeat_infos = get_repeat_infos(length)
-
-            for s in map(str, range(split_first, split_last + 1)):
-                for repeat_length, repeats in repeat_infos:
-                    if s == s[:repeat_length] * repeats:
-                        total += int(s)
-                        break
-
-    return total
-
-
-def re_sum_invalid_ids_02(intervals: Iterator[tuple[int, int]]) -> int:
-    """
-    Return solution for part 2.
+    Process the repeat information on the interval (invalid ids for both parts
+    are stored in the sets)
     """
 
-    pattern = re.compile(r'^(.+?)\1+$')
-    return sum(x if pattern.match(str(x)) else 0
-               for first, last in intervals
-               for x in range(first, last + 1))
+    r_first, r_last = get_first_last(r_info[0], interval_first, interval_last)
+    for repeat_start in range(r_first, r_last + 1):
+        candidate = int(str(repeat_start) * (r_repeats := r_info[1]))
+        if interval_first <= candidate <= interval_last:
+            part_2.add(candidate)
+            if r_repeats == 2:
+                part_1.add(candidate)
+
+
+def process_interval(interval_first: int, interval_last: int, part_1: set[int],
+                     part_2: set[int]) -> None:
+    """
+    Process the interval (invalid ids for both parts are stored in the sets)
+    """
+
+    for length in range(len(str(interval_first)), len(str(interval_last)) + 1):
+
+        repeat_last = min(interval_last, (i := 10 ** length) - 1)
+        repeat_first = max(interval_first, i // 10)
+
+        for r_info in get_repeat_infos(length):
+            process_r_info(r_info, repeat_first, repeat_last, part_1, part_2)
 
 
 def _main() -> None:
-    for test in (True, False,):
+    for test in (True, False):
 
         if test:
             filename = "gift_shop_test_input.txt"
@@ -109,8 +80,16 @@ def _main() -> None:
             expected = 12850231731, 24774350322
 
         with open(filename, encoding="utf-8") as file:
-            solutions = (sum_invalid_ids_01(_intervals(file)),
-                         sum_invalid_ids_02(_intervals(file)))
+            intervals = list(tuple(map(int, interval.split('-')))
+                             for interval in file.readline().split(','))
+            part_1: set[int] = set()
+            part_2: set[int] = set()
+
+            for first, last in intervals:
+                process_interval(first, last, part_1, part_2)
+
+            solutions = sum(part_1), sum(part_2)
+
             print(solutions)
             assert solutions == expected
 
