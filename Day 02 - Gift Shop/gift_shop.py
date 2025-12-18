@@ -37,21 +37,22 @@ def get_first_last(length: int, first: int, last: int) -> tuple[int, int]:
     return s_first, s_last
 
 
-def process_r_info(r_info: tuple[int, int], interval_first: int,
-                   interval_last: int, part_1: set[int],
-                   part_2: set[int]) -> None:
+def process_repeats(length: int, interval_first: int, interval_last: int,
+                    part_1: set[int], part_2: set[int]) -> None:
     """
-    Process the repeat information on the interval (invalid ids for both parts
-    are stored in the sets)
+    Process all possible repeats for the length on the interval (invalid ids
+    for both parts are stored in the sets)
     """
 
-    r_first, r_last = get_first_last(r_info[0], interval_first, interval_last)
-    for repeat_start in range(r_first, r_last + 1):
-        candidate = int(str(repeat_start) * (r_repeats := r_info[1]))
-        if interval_first <= candidate <= interval_last:
-            part_2.add(candidate)
-            if r_repeats == 2:
-                part_1.add(candidate)
+    for repeat_length, nr_repeats in get_repeat_infos(length):
+        r_first, r_last = get_first_last(repeat_length, interval_first,
+                                         interval_last)
+        for repeat_start in range(r_first, r_last + 1):
+            candidate = int(str(repeat_start) * nr_repeats)
+            if interval_first <= candidate <= interval_last:
+                part_2.add(candidate)
+                if nr_repeats == 2:
+                    part_1.add(candidate)
 
 
 def process_interval(interval_first: int, interval_last: int, part_1: set[int],
@@ -61,12 +62,9 @@ def process_interval(interval_first: int, interval_last: int, part_1: set[int],
     """
 
     for length in range(len(str(interval_first)), len(str(interval_last)) + 1):
-
         repeat_last = min(interval_last, (i := 10 ** length) - 1)
         repeat_first = max(interval_first, i // 10)
-
-        for r_info in get_repeat_infos(length):
-            process_r_info(r_info, repeat_first, repeat_last, part_1, part_2)
+        process_repeats(length, repeat_first, repeat_last, part_1, part_2)
 
 
 def _main() -> None:

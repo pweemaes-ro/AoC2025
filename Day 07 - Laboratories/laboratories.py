@@ -10,7 +10,6 @@ def get_solutions(file: TextIOWrapper) -> tuple[int, int]:
     Return the solutions for part 1 and part 2.
     """
 
-    file.seek(0)
     lines = file.readlines()
 
     split_count = 0

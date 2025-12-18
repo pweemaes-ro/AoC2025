@@ -16,7 +16,6 @@ class Rolls:
     """
 
     def __init__(self, file: TextIOWrapper) -> None:
-        file.seek(0)
         self._rolls = [list(line[:-1]) for line in file.readlines()]
         self._neighbor_counts = self._rolls_to_neighbors(self._rolls)
         self._accessible_rolls = self._get_accessible_rolls()

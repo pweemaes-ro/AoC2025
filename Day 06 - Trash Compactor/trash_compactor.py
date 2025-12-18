@@ -1,8 +1,8 @@
 """
 Solutions for AoC 2025 Day 6.
 """
+from collections.abc import Sequence
 from re import compile as regexp_compile
-from io import TextIOWrapper
 from math import prod
 
 nrs_pattern = regexp_compile(r'\d+')
@@ -56,7 +56,7 @@ def _get_total(ops_and_offsets: list[tuple[str, int]], int_rows: list[str]) \
     return total
 
 
-def solve_part_1(file: TextIOWrapper) -> int:
+def solve_part_1(lines: Sequence[str]) -> int:
     """
     Return the solution for part 1.
     """
@@ -64,8 +64,7 @@ def solve_part_1(file: TextIOWrapper) -> int:
     nr_rows = []
     ops = []
 
-    file.seek(0)
-    for line in file.readlines():
+    for line in lines:
         if line[0] in ('+', '*'):
             ops = ops_pattern.findall(line)
         else:
@@ -79,17 +78,15 @@ def solve_part_1(file: TextIOWrapper) -> int:
     return total
 
 
-def solve_part_2(file: TextIOWrapper) -> int:
+def solve_part_2(lines: Sequence[str]) -> int:
     """
     Return the solution for part 2.
     """
 
-    file.seek(0)
-
     int_rows: list[str] = []
     ops_and_offsets = []
 
-    for line in file.readlines():
+    for line in lines:
         if line[0] not in ('+', '*'):
             int_rows.append(line[:-1])  # skip newline char at end of each line
         else:
@@ -116,7 +113,8 @@ def _main() -> None:
             expected = 4583860641327, 11602774058280
 
         with open(filename, encoding="utf-8") as file:
-            solution = solve_part_1(file), solve_part_2(file)
+            lines = file.readlines()
+            solution = solve_part_1(lines), solve_part_2(lines)
             print(solution)
             assert solution == expected
 

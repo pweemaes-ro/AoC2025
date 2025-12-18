@@ -3,6 +3,8 @@ Solutions for AoC 2025 Day 4.
 """
 from collections.abc import Sequence, Iterator
 from io import TextIOWrapper
+from itertools import takewhile
+from typing import cast
 
 type Interval = tuple[int, int]
 type Id = int
@@ -34,13 +36,15 @@ def _sorted_merged_intervals(intervals: Sequence[Interval]) \
 
 
 def _intervals_and_ids(file: TextIOWrapper) -> tuple[list[Interval], list[Id]]:
-    file.seek(0)
+    """
+    Return a tuple (list[intervals], list[ids]), where list[intervals] is a
+    list of non-overlapping(!) and sorted(!) intervals.
+    """
 
-    intervals = []
-
-    while len(line := file.readline()) > 1:
-        first, last = map(int, line.split('-'))
-        intervals.append((first, last))
+    intervals = cast(list[Interval], [
+        tuple(map(int, line.split('-')))
+        for line in takewhile(lambda line: len(line) > 1, file)
+    ])
 
     ids = [int(line) for line in file.readlines()]
 
