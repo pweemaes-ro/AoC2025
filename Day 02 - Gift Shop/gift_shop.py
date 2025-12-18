@@ -1,11 +1,12 @@
 """
 Solutions for AoC 2025 Day 2.
 """
+from collections.abc import Iterable
 from functools import lru_cache
 
 
 @lru_cache
-def get_repeat_infos(n: int) -> list[tuple[int, int]]:
+def get_repeat_infos(n: int) -> Iterable[tuple[int, int]]:
     """
     Return tuples (d, n // d) of all divisors d of n, except n itself. Example:
     for n = 8, return [(1, 8), (2, 4), (4, 2)], but do not include (8, 1).
