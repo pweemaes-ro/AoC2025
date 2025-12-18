@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from io import TextIOWrapper
 
 
-def get_turns(file: TextIOWrapper) -> list[tuple[int, int]]:
+def get_turns(file: TextIOWrapper) -> Iterable[tuple[int, int]]:
     """
     Return a list of tuples (direction, clicks) where direction == 1 if turn is
     clockwise ("R"), else -1.
