@@ -2,45 +2,50 @@
 Solutions for AoC 2025 Day 1.
 """
 from collections.abc import Iterable
-from io import TextIOWrapper
 
 
-def get_turns(file: TextIOWrapper) -> Iterable[tuple[int, int]]:
+def get_pwd_01(turns: Iterable[tuple[str, int]]) -> int:
     """
-    Return a list of tuples (direction, clicks) where direction == 1 if turn is
-    clockwise ("R"), else -1.
+    Return the solution for part 1 (based on the faster RvB code...).
     """
 
-    return [(1 if turn[0] == "R" else - 1, int(turn[1:]))
-            for turn in file.readlines()]
+    pos, pwd = 50, 0
+    for directions, clicks in turns:
+        if directions == "R":
+            pos = (pos + clicks) % 100
+        else:
+            pos = (pos - clicks) % 100
+        if pos == 0:
+            pwd += 1
+
+    return pwd
 
 
-def get_pwd_01(turns: Iterable[tuple[int, int]]) -> int:
+def get_pwd_02(turns: Iterable[tuple[str, int]]) -> int:
     """
-    Calculate the password from the turns (part 1 solution).
-    """
-
-    pos = 50
-    return sum(int((pos := (pos + direction * clicks) % 100) == 0)
-               for direction, clicks in turns)
-
-
-def get_pwd_02(turns: Iterable[tuple[int, int]]) -> int:
-    """
-    Calculate the password from the turns (part 2 solution).
+    Return result for part 2 (based on faster RvB code...).
     """
 
-    pwd, pos = 0, 50
-
-    for (direction, clicks) in turns:
-        div, mod = divmod(clicks, 100)
-
-        pwd += div
-        new_position = (pos + direction * mod) % 100
-        if pos != 0:
-            pwd += int((direction * pos > direction * new_position) or
-                       new_position == 0)
-        pos = new_position
+    pos, pwd = 50, 0
+    for direction, clicks in turns:
+        quotient, remainder = divmod(clicks, 100)
+        pwd += quotient
+        if direction == "R":
+            pos += remainder
+            if pos > 99:
+                pos -= 100
+                pwd += 1
+            elif pos == 0:
+                pwd += 1
+        else:
+            old_dial = pos
+            pos -= remainder
+            if pos < 0:
+                pos += 100
+                if old_dial != 0:
+                    pwd += 1
+            elif pos == 0:
+                pwd += 1
 
     return pwd
 
@@ -56,10 +61,10 @@ def _main() -> None:
             expected = 964, 5872
 
         with open(filename, encoding="utf-8") as file:
-            turns = get_turns(file)
+            turns = [(s[0], int(s[1:])) for s in file]
             solutions = get_pwd_01(turns), get_pwd_02(turns)
             print(solutions)
-            assert solutions == expected
+        assert solutions == expected
 
     print("OK!")
 
